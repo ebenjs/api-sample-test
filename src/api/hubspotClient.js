@@ -13,7 +13,7 @@ const {
 const hubspotClient = new hubspot.Client({ accessToken: "" });
 let expirationDate;
 
-const refreshAccessToken = async (domain, hubId, tryCount) => {
+const refreshAccessToken = async (domain, hubId) => {
   const { HUBSPOT_CID, HUBSPOT_CS } = process.env;
   const account = domain.integrations.hubspot.accounts.find(
     (account) => account.hubId === hubId,
@@ -250,4 +250,5 @@ module.exports = {
   fetchCompaniesBatch,
   fetchContactsBatch,
   fetchMeetings,
+  fetchMeetingContactAssociations
 };
