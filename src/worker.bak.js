@@ -2,7 +2,7 @@ const hubspot = require('@hubspot/api-client');
 const { queue } = require('async');
 const _ = require('lodash');
 
-const { filterNullValuesFromObject, goal } = require('./utils/utils');
+const { filterNullValuesFromObject, goal } = require('./helpers/utils');
 const Domain = require('./domain/Domain');
 
 const hubspotClient = new hubspot.Client({ accessToken: '' });
