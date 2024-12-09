@@ -1,7 +1,14 @@
 const hubspot = require("@hubspot/api-client");
-const { buildCompaniesSearchObject } = require("../helpers/searchQueryBuilder");
+const {
+  buildCompaniesSearchObject,
+  buildContactSearchObject,
+} = require("../helpers/searchQueryBuilder");
 const { RequestType } = require("../enums/globalEnums");
-const { processCompanyData } = require("../services/dataProcessors");
+const {
+  processCompanyData,
+  processContactData,
+  generateLastModifiedDateFilter,
+} = require("../services/dataProcessors");
 
 const hubspotClient = new hubspot.Client({ accessToken: "" });
 let expirationDate;
@@ -50,8 +57,15 @@ const fetchCompaniesBatch = async (
     now
   );
 
-  const searchObject = buildCompaniesSearchObject(lastModifiedDateFilter, offsetObject);
-  const searchResult = await retryHubspotSearch(account, searchObject, RequestType.COMPANIES);
+  const searchObject = buildCompaniesSearchObject(
+    lastModifiedDateFilter,
+    offsetObject
+  );
+  const searchResult = await retryHubspotSearch(
+    account,
+    searchObject,
+    RequestType.COMPANIES
+  );
 
   if (!searchResult) {
     throw new Error(
@@ -78,21 +92,113 @@ const fetchCompaniesBatch = async (
   return true;
 };
 
-const generateLastModifiedDateFilter = (
-  date,
-  nowDate,
-  propertyName = "hs_lastmodifieddate"
+const fetchContactsBatch = async (
+  account,
+  lastPulledDate,
+  now,
+  offsetObject,
+  queue
 ) => {
-  const lastModifiedDateFilter = date
-    ? {
-        filters: [
-          { propertyName, operator: "GTE", value: `${date.valueOf()}` },
-          { propertyName, operator: "LTE", value: `${nowDate.valueOf()}` },
-        ],
-      }
-    : {};
+  const lastModifiedDate = offsetObject.lastModifiedDate || lastPulledDate;
+  const lastModifiedDateFilter = generateLastModifiedDateFilter(
+    lastModifiedDate,
+    now,
+    "lastmodifieddate"
+  );
 
-  return lastModifiedDateFilter;
+  const searchObject = buildContactSearchObject(
+    lastModifiedDateFilter,
+    offsetObject
+  );
+  const searchResult = await retryHubspotSearch(
+    account,
+    searchObject,
+    RequestType.CONTACTS
+  );
+
+  if (!searchResult) {
+    throw new Error(
+      "Failed to fetch contacts after multiple attempts. Aborting."
+    );
+  }
+
+  const data = searchResult.results || [];
+  offsetObject.after = parseInt(searchResult?.paging?.next?.after);
+
+  console.log("fetch contact batch");
+
+  const companyAssociations = await fetchContactCompanyAssociations(data);
+  processContactData(data, companyAssociations, lastPulledDate, queue);
+
+  if (!offsetObject?.after) {
+    return false;
+  }
+
+  if (offsetObject?.after >= 9900) {
+    offsetObject.after = 0;
+    offsetObject.lastModifiedDate = new Date(
+      data[data.length - 1].updatedAt
+    ).valueOf();
+  }
+
+  return true;
+};
+
+const fetchContactCompanyAssociations = async (contacts) => {
+  const contactIds = contacts.map((contact) => contact.id);
+
+  const response = await hubspotClient.apiRequest({
+    method: "post",
+    path: "/crm/v3/associations/CONTACTS/COMPANIES/batch/read",
+    body: { inputs: contactIds.map((id) => ({ id })) },
+  });
+  const results = (await response.json())?.results || [];
+
+  const associations = Object.fromEntries(
+    results
+      .map((assoc) => assoc.from && [assoc.from.id, assoc.to[0]?.id])
+      .filter(Boolean)
+  );
+
+  return associations;
+};
+
+const fetchMeetings = async (account, searchObject, requestType) => {
+  const searchResult = await retryHubspotSearch(
+    account,
+    searchObject,
+    requestType
+  );
+
+  if (!searchResult)
+    throw new Error("Failed to fetch meetings after 4 attempts.");
+
+  console.log("Fetched meeting batch:", searchResult.results?.length || 0);
+
+  return searchResult.results || [];
+};
+
+const fetchMeetingContactAssociations = async (meetings) => {
+  const associationResults = await (
+    await hubspotClient.apiRequest({
+      method: "post",
+      path: "/crm/v3/associations/MEETINGS/CONTACTS/batch/read",
+      body: { inputs: meetings.map((meeting) => ({ id: meeting.id })) },
+    })
+  ).json();
+
+  const associations = associationResults.results || [];
+  const meetingToContactsMap = {};
+
+  associations.forEach((assoc) => {
+    if (assoc.from) {
+      meetingToContactsMap[assoc.from.id] = assoc.to.map(
+        (contact) => contact.id
+      );
+    }
+  });
+
+  return meetingToContactsMap;
 };
 
 const retryHubspotSearch = async (account, searchObject, requestType) => {
@@ -119,7 +225,7 @@ const getProperApiBasedOnRequestType = (requestType) => {
     case "contacts":
       return hubspotClient.crm.contacts.searchApi;
     case "meetings":
-      return hubspotClient.crm.meetings.searchApi;
+      return hubspotClient.crm.objects.meetings.searchApi;
     default:
       break;
   }
@@ -139,4 +245,9 @@ const isAccessTokenExpired = (err) => {
 const waitWithBackoff = (tryCount) =>
   new Promise((resolve) => setTimeout(resolve, 5000 * Math.pow(2, tryCount)));
 
-module.exports = { refreshAccessToken, fetchCompaniesBatch };
+module.exports = {
+  refreshAccessToken,
+  fetchCompaniesBatch,
+  fetchContactsBatch,
+  fetchMeetings
+};
