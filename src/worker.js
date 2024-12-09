@@ -11,9 +11,11 @@ const {
   refreshAccessToken,
   fetchContactsBatch,
   fetchMeetings,
+  fetchMeetingContactAssociations,
 } = require("./api/hubspotClient");
 const { buildMeetingSearchObject } = require("./helpers/searchQueryBuilder");
 const { RequestType } = require("./enums/globalEnums");
+const { processMeetingBatch, updateOffsetObject } = require("./services/dataProcessors");
 
 const saveDomain = async (domain) => {
   // disable this for testing purposes
