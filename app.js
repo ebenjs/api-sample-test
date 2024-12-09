@@ -22,10 +22,10 @@ mongoose
   )
   .then(() => {
     console.log('connected to database');
-    require('./Domain');
+    require('./src/domain/Domain');
 
     // worker setup
-    require('./worker')();
+    require('./src/worker')();
   });
 
 process.env.instance = 'app';
