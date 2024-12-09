@@ -1,3 +1,7 @@
+const hubspot = require("@hubspot/api-client");
+const { filterNullValuesFromObject } = require("../helpers/utils");
+const hubspotClient = new hubspot.Client({ accessToken: "" });
+
 const processCompanyData = (companies, lastPulledDate, queue) => {
   companies.forEach((company) => {
     if (!company.properties) return;
