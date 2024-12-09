@@ -86,20 +86,23 @@ const processMeetings = async (domain, hubId, q) => {
       offsetObject,
       lastPulledDate,
       now,
-      limit
+      limit,
     );
 
-    const meetings = await fetchMeetings(account, searchObject, RequestType.MEETINGS);
-
-    const meetingToContactsMap = await fetchMeetingContactAssociations(
-      meetings
+    const meetings = await fetchMeetings(
+      account,
+      searchObject,
+      RequestType.MEETINGS,
     );
+
+    const meetingToContactsMap =
+      await fetchMeetingContactAssociations(meetings);
 
     await processMeetingBatch(
       meetings,
       meetingToContactsMap,
       lastPulledDate,
-      q
+      q,
     );
 
     updateOffsetObject(offsetObject, meetings);

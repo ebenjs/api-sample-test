@@ -16,7 +16,7 @@ let expirationDate;
 const refreshAccessToken = async (domain, hubId, tryCount) => {
   const { HUBSPOT_CID, HUBSPOT_CS } = process.env;
   const account = domain.integrations.hubspot.accounts.find(
-    (account) => account.hubId === hubId
+    (account) => account.hubId === hubId,
   );
   const { accessToken, refreshToken } = account;
 
@@ -27,7 +27,7 @@ const refreshAccessToken = async (domain, hubId, tryCount) => {
       undefined,
       HUBSPOT_CID,
       HUBSPOT_CS,
-      refreshToken
+      refreshToken,
     )
     .then(async (result) => {
       const body = result.body ? result.body : result;
@@ -49,27 +49,27 @@ const fetchCompaniesBatch = async (
   lastPulledDate,
   now,
   offsetObject,
-  q
+  q,
 ) => {
   const lastModifiedDate = offsetObject.lastModifiedDate || lastPulledDate;
   const lastModifiedDateFilter = generateLastModifiedDateFilter(
     lastModifiedDate,
-    now
+    now,
   );
 
   const searchObject = buildCompaniesSearchObject(
     lastModifiedDateFilter,
-    offsetObject
+    offsetObject,
   );
   const searchResult = await retryHubspotSearch(
     account,
     searchObject,
-    RequestType.COMPANIES
+    RequestType.COMPANIES,
   );
 
   if (!searchResult) {
     throw new Error(
-      "Failed to fetch companies after multiple attempts. Aborting."
+      "Failed to fetch companies after multiple attempts. Aborting.",
     );
   }
 
@@ -85,7 +85,7 @@ const fetchCompaniesBatch = async (
   if (offsetObject?.after >= 9900) {
     offsetObject.after = 0;
     offsetObject.lastModifiedDate = new Date(
-      data[data.length - 1].updatedAt
+      data[data.length - 1].updatedAt,
     ).valueOf();
   }
 
@@ -97,28 +97,28 @@ const fetchContactsBatch = async (
   lastPulledDate,
   now,
   offsetObject,
-  queue
+  queue,
 ) => {
   const lastModifiedDate = offsetObject.lastModifiedDate || lastPulledDate;
   const lastModifiedDateFilter = generateLastModifiedDateFilter(
     lastModifiedDate,
     now,
-    "lastmodifieddate"
+    "lastmodifieddate",
   );
 
   const searchObject = buildContactSearchObject(
     lastModifiedDateFilter,
-    offsetObject
+    offsetObject,
   );
   const searchResult = await retryHubspotSearch(
     account,
     searchObject,
-    RequestType.CONTACTS
+    RequestType.CONTACTS,
   );
 
   if (!searchResult) {
     throw new Error(
-      "Failed to fetch contacts after multiple attempts. Aborting."
+      "Failed to fetch contacts after multiple attempts. Aborting.",
     );
   }
 
@@ -137,7 +137,7 @@ const fetchContactsBatch = async (
   if (offsetObject?.after >= 9900) {
     offsetObject.after = 0;
     offsetObject.lastModifiedDate = new Date(
-      data[data.length - 1].updatedAt
+      data[data.length - 1].updatedAt,
     ).valueOf();
   }
 
@@ -157,7 +157,7 @@ const fetchContactCompanyAssociations = async (contacts) => {
   const associations = Object.fromEntries(
     results
       .map((assoc) => assoc.from && [assoc.from.id, assoc.to[0]?.id])
-      .filter(Boolean)
+      .filter(Boolean),
   );
 
   return associations;
@@ -167,7 +167,7 @@ const fetchMeetings = async (account, searchObject, requestType) => {
   const searchResult = await retryHubspotSearch(
     account,
     searchObject,
-    requestType
+    requestType,
   );
 
   if (!searchResult)
@@ -193,7 +193,7 @@ const fetchMeetingContactAssociations = async (meetings) => {
   associations.forEach((assoc) => {
     if (assoc.from) {
       meetingToContactsMap[assoc.from.id] = assoc.to.map(
-        (contact) => contact.id
+        (contact) => contact.id,
       );
     }
   });
@@ -249,5 +249,5 @@ module.exports = {
   refreshAccessToken,
   fetchCompaniesBatch,
   fetchContactsBatch,
-  fetchMeetings
+  fetchMeetings,
 };

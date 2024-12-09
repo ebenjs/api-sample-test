@@ -1,4 +1,6 @@
-const { generateLastModifiedDateFilter } = require("../services/dataProcessors");
+const {
+  generateLastModifiedDateFilter,
+} = require("../services/dataProcessors");
 
 const buildCompaniesSearchObject = (lastModifiedDateFilter, offsetObject) => ({
   filterGroups: [lastModifiedDateFilter],
@@ -39,7 +41,7 @@ const buildMeetingSearchObject = (offsetObject, lastPulledDate, now, limit) => {
   const lastModifiedDateFilter = generateLastModifiedDateFilter(
     lastModifiedDate,
     now,
-    "lastmodifieddate"
+    "lastmodifieddate",
   );
 
   return {

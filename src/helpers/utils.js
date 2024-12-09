@@ -11,7 +11,7 @@ const disallowedValues = [
 
 const getHubspotAccount = (domain, hubId) =>
   domain.integrations.hubspot.accounts.find(
-    (account) => account.hubId === hubId
+    (account) => account.hubId === hubId,
   );
 
 const filterNullValuesFromObject = (object) =>
@@ -23,8 +23,8 @@ const filterNullValuesFromObject = (object) =>
         typeof v !== "undefined" &&
         (typeof v !== "string" ||
           !disallowedValues.includes(v.toLowerCase()) ||
-          !v.toLowerCase().includes("!$record"))
-    )
+          !v.toLowerCase().includes("!$record")),
+    ),
   );
 
 const normalizePropertyName = (key) =>

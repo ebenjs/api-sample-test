@@ -1,9 +1,9 @@
 const RequestType = {
-    COMPANIES: "companies",
-    CONTACTS: "contacts",
-    MEETINGS: "meetings"
-}
+  COMPANIES: "companies",
+  CONTACTS: "contacts",
+  MEETINGS: "meetings",
+};
 
 module.exports = {
-    RequestType
-  };
+  RequestType,
+};
