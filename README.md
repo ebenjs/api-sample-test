@@ -22,10 +22,7 @@ Below are my suggestions :
 - **Asynchronous Operations**: Make sure I/O operations (e.g., network requests) are handled asynchronously to avoid blocking the main thread and improve performance.
 - **Reduce Memory Usage**: Identify and eliminate any unnecessary object creation or memory usage that could slow down the application.
 
-Here's a note you can add to inform the corrector:
-
 ---
-
 **Note for Corrector:**
 
 I have successfully implemented the feature as requested, but I encountered a challenge while searching for the correct endpoints to interact with HubSpot's API, particularly for the meetings functionality. Despite reviewing the HubSpot documentation, I was unable to locate precise information on the exact endpoints needed for meetings.
@@ -33,10 +30,6 @@ I have successfully implemented the feature as requested, but I encountered a ch
 As a result, I proceeded with building the application so that once the correct endpoint is identified and provided, the app will run smoothly with that configuration. The necessary changes can be made by updating the endpoint in the relevant section of the code.
 
 Thank you for your understanding, and please feel free to provide any additional guidance on the correct endpoints if needed.
-
----
-
-This should explain the situation clearly to the corrector!
 
 ## Getting Started
 
