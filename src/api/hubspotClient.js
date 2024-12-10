@@ -170,6 +170,8 @@ const fetchMeetings = async (account, searchObject, requestType) => {
     requestType,
   );
 
+  console.log("working")
+
   if (!searchResult)
     throw new Error("Failed to fetch meetings after 4 attempts.");
 
@@ -210,6 +212,7 @@ const retryHubspotSearch = async (account, searchObject, requestType) => {
     try {
       return await properAPI.doSearch(searchObject);
     } catch (err) {
+      console.error(err)
       tryCount++;
       await handleSearchError(account, err, tryCount);
     }

@@ -41,16 +41,18 @@ const buildMeetingSearchObject = (offsetObject, lastPulledDate, now, limit) => {
   const lastModifiedDateFilter = generateLastModifiedDateFilter(
     lastModifiedDate,
     now,
-    "lastmodifieddate",
+    "lastmodifieddate"
   );
 
-  return {
-    filterGroups: [lastModifiedDateFilter],
-    sorts: [{ propertyName: "lastmodifieddate", direction: "ASCENDING" }],
-    properties: ["title", "hs_meeting_start_time", "hs_meeting_end_time"],
-    limit,
-    after: offsetObject.after,
-  };
+  return {}
+
+  // return {
+  //   filterGroups: [lastModifiedDateFilter],
+  //   sorts: [{ propertyName: "lastmodifieddate", direction: "ASCENDING" }],
+  //   properties: ["title", "hs_meeting_start_time", "hs_meeting_end_time"],
+  //   limit,
+  //   after: offsetObject.after,
+  // };
 };
 
 module.exports = {
